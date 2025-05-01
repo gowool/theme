@@ -61,7 +61,7 @@ func (t *environment) Global(global ...string) Theme {
 }
 
 func (t *environment) Write(ctx context.Context, w io.Writer, name string, data any) error {
-	wrap, err := t.Environment.Load(ctx, name)
+	wrap, err := t.Load(ctx, name)
 	if err != nil {
 		return err
 	}
