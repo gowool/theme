@@ -22,12 +22,20 @@ import (
 )
 
 var Funcs = template.FuncMap{
+	"ternary": func(condition bool, trueValue, falseValue any) any {
+		if condition {
+			return trueValue
+		}
+		return falseValue
+	},
+	"js":        func(str string) template.JS { return template.JS(str) },
+	"css":       func(str string) template.CSS { return template.CSS(str) },
+	"raw":       func(s string) template.HTML { return template.HTML(s) },
+	"html":      func(str string) template.HTML { return template.HTML(str) },
+	"html_attr": func(str string) template.HTMLAttr { return template.HTMLAttr(str) },
 	"empty": func(given any) bool {
 		g := reflect.ValueOf(given)
 		return !g.IsValid() || g.IsNil() || g.IsZero()
-	},
-	"raw": func(s string) template.HTML {
-		return template.HTML(s)
 	},
 	"escape": html.EscapeString,
 	"deref": func(s any) any {
@@ -37,7 +45,14 @@ var Funcs = template.FuncMap{
 		}
 		return s
 	},
-	"dump":           spew.Sdump,
+	"dump": spew.Sdump,
+	"str_build": func(str ...string) string {
+		var b strings.Builder
+		for _, s := range str {
+			b.WriteString(s)
+		}
+		return b.String()
+	},
 	"str_camelcase":  camelcase.Camelcase,
 	"str_snakecase":  snakecase.Snakecase,
 	"str_trim":       strings.TrimSpace,
