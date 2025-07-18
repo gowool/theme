@@ -117,7 +117,7 @@ var Funcs = template.FuncMap{
 	"reverse":  func(v []any) []any { slices.Reverse(v); return v },
 	"repeat":   func(v []any, count int) []any { return slices.Repeat(v, count) },
 	"contains": func(v []any, i any) bool { return slices.Contains(v, i) },
-	"index":    func(v []any, i any) int { return slices.Index(v, i) },
+	"index_of": func(v []any, i any) int { return slices.Index(v, i) },
 	"concat":   func(sl ...[]any) []any { return slices.Concat(sl...) },
 	"dict": func(v ...any) map[any]any {
 		if len(v)%2 != 0 {

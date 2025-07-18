@@ -7,6 +7,6 @@ require (
 	github.com/gowool/extends-template v0.0.0-20240901012006-3ead36bbe616
 	github.com/segmentio/go-camelcase v0.0.0-20160726192923-7085f1e3c734
 	github.com/segmentio/go-snakecase v1.2.0
-	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0
+	golang.org/x/exp v0.0.0-20250717185816-542afb5b7346
 	gopkg.in/yaml.v3 v3.0.1
 )
