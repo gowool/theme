@@ -5,7 +5,7 @@ go 1.24
 replace github.com/gowool/theme => ..
 
 require (
-	github.com/gowool/theme v1.0.9
+	github.com/gowool/theme v1.1.0
 	go.uber.org/fx v1.24.0
 )
 
@@ -17,7 +17,7 @@ require (
 	go.uber.org/dig v1.19.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.27.0 // indirect
-	golang.org/x/exp v0.0.0-20250717185816-542afb5b7346 // indirect
+	golang.org/x/exp v0.0.0-20250718183923-645b1fa84792 // indirect
 	golang.org/x/sys v0.34.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
