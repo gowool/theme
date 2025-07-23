@@ -74,19 +74,19 @@ var Funcs = template.FuncMap{
 	"str_repeat":     strings.Repeat,
 	"str_len":        func(s string) int { return utf8.RuneCountInString(s) },
 	"json": func(v any) string {
-		return encode(v, json.Marshal)
+		return Encode(v, json.Marshal)
 	},
 	"xml": func(v any) string {
-		return encode(v, xml.Marshal)
+		return Encode(v, xml.Marshal)
 	},
 	"yaml": func(v any) string {
-		return encode(v, yaml.Marshal)
+		return Encode(v, yaml.Marshal)
 	},
 	"json_pretty": func(v any) string {
-		return pretty(v, json.MarshalIndent)
+		return Pretty(v, json.MarshalIndent)
 	},
 	"xml_pretty": func(v any) string {
-		return pretty(v, xml.MarshalIndent)
+		return Pretty(v, xml.MarshalIndent)
 	},
 	"yaml_pretty": func(v any) string {
 		var buf bytes.Buffer
@@ -97,6 +97,7 @@ var Funcs = template.FuncMap{
 		}
 		return template.JSEscapeString(internal.String(buf.Bytes()))
 	},
+	"seq":   Seq,
 	"len":   func(v any) int { return reflect.ValueOf(v).Len() },
 	"list":  func(v ...any) []any { return v },
 	"at":    func(v []any, i int) any { return v[i] },
@@ -136,16 +137,16 @@ var Funcs = template.FuncMap{
 	"set":    func(m map[any]any, k, v any) map[any]any { m[k] = v; return m },
 	"unset":  func(m map[any]any, k any) map[any]any { delete(m, k); return m },
 	"now":    time.Now,
-	"date":   formatDate,
+	"date":   FormatDate,
 	"date_local": func(fmt string, date any) string {
-		return formatDate(fmt, date, "Local")
+		return FormatDate(fmt, date, "Local")
 	},
 	"date_utc": func(fmt string, date any) string {
-		return formatDate(fmt, date, "UTC")
+		return FormatDate(fmt, date, "UTC")
 	},
 }
 
-func formatDate(fmt string, date any, location string) string {
+func FormatDate(fmt string, date any, location string) string {
 	var t time.Time
 	switch date := date.(type) {
 	case time.Time:
@@ -170,7 +171,7 @@ func formatDate(fmt string, date any, location string) string {
 	return t.In(loc).Format(fmt)
 }
 
-func encode(v any, fn func(v any) ([]byte, error)) string {
+func Encode(v any, fn func(v any) ([]byte, error)) string {
 	raw, err := fn(v)
 	if err != nil {
 		return ""
@@ -178,10 +179,87 @@ func encode(v any, fn func(v any) ([]byte, error)) string {
 	return template.JSEscapeString(internal.String(raw))
 }
 
-func pretty(v any, fn func(v any, prefix, indent string) ([]byte, error)) string {
+func Pretty(v any, fn func(v any, prefix, indent string) ([]byte, error)) string {
 	raw, err := fn(v, "", "  ")
 	if err != nil {
 		return ""
 	}
 	return template.JSEscapeString(internal.String(raw))
+}
+
+// Seq creates a sequence of integers from args.
+//
+// Examples:
+//
+//	3 => 1, 2, 3
+//	1 2 4 => 1, 3
+//	-3 => -1, -2, -3
+//	1 4 => 1, 2, 3, 4
+//	1 -2 => 1, 0, -1, -2
+func Seq(args ...int) []int {
+	if len(args) < 1 || len(args) > 3 {
+		// invalid number of arguments to Seq
+		return nil
+	}
+
+	inc := 1
+	var last int
+	first := args[0]
+
+	if len(args) == 1 {
+		last = first
+		if last == 0 {
+			return nil
+		} else if last > 0 {
+			first = 1
+		} else {
+			first = -1
+			inc = -1
+		}
+	} else if len(args) == 2 {
+		last = args[1]
+		if last < first {
+			inc = -1
+		}
+	} else {
+		inc = args[1]
+		last = args[2]
+		if inc == 0 {
+			// 'increment' must not be 0
+			return nil
+		}
+		if first < last && inc < 0 {
+			// 'increment' must be > 0
+			return nil
+		}
+		if first > last && inc > 0 {
+			// 'increment' must be < 0
+			return nil
+		}
+	}
+
+	// sanity check
+	if last < -100000 {
+		// size of result exceeds limit
+		return nil
+	}
+	size := ((last - first) / inc) + 1
+
+	// sanity check
+	if size <= 0 || size > 2000 {
+		// size of result exceeds limit
+		return nil
+	}
+
+	seq := make([]int, size)
+	val := first
+	for i := 0; ; i++ {
+		seq[i] = val
+		val += inc
+		if (inc < 0 && val < last) || (inc > 0 && val > last) {
+			break
+		}
+	}
+
+	return seq
 }
